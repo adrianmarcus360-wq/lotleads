@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { sendWelcomeEmail } from '@/lib/email';
 
 const schema = z.object({
   name: z.string().min(1).max(100),
@@ -35,6 +36,14 @@ export async function POST(req: Request) {
     const user = await db.user.create({
       data: { name, company, email, passwordHash },
     });
+
+    // Send welcome email (non-blocking)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lotleads.vercel.app';
+    sendWelcomeEmail({
+      email: user.email,
+      name: user.name ?? 'there',
+      leadsUrl: `${appUrl}/leads`,
+    }).catch(console.error);
 
     return NextResponse.json({
       id: user.id,

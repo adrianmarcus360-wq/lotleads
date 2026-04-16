@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { stripe, AMOUNTS } from '@/lib/stripe';
 import { db } from '@/lib/db';
 import { z } from 'zod';
+import { sendPurchaseConfirmation } from '@/lib/email';
 
 const schema = z.object({
   type: z.enum(['SHARED', 'EXCLUSIVE']),
@@ -84,6 +85,20 @@ export async function POST(
       });
       return p;
     });
+    // Send confirmation email (non-blocking)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lotleads.vercel.app';
+    sendPurchaseConfirmation({
+      buyerEmail: session.user.email!,
+      buyerName: session.user.name ?? 'there',
+      leadCity: lead.city,
+      leadState: lead.state,
+      conditionScore: lead.conditionScore,
+      estimatedJobMin: lead.estimatedJobMin,
+      estimatedJobMax: lead.estimatedJobMax,
+      purchaseType: type,
+      dashboardUrl: `${appUrl}/dashboard/leads/${params.id}`,
+    }).catch(console.error);
+
     return NextResponse.json({ success: true, purchaseId: purchase.id, usedCredit: true });
   }
 

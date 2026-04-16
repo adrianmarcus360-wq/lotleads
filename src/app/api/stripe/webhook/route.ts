@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe';
 import { db } from '@/lib/db';
 import { headers } from 'next/headers';
 import type Stripe from 'stripe';
+import { sendPurchaseConfirmation, sendProSubscriptionConfirmation } from '@/lib/email';
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -102,6 +103,25 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         }
       }
     });
+
+    // Send purchase confirmation email (non-blocking)
+    const user = await db.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+    const lead = await db.lead.findUnique({ where: { id: leadId }, select: { city: true, state: true, conditionScore: true, estimatedJobMin: true, estimatedJobMax: true } });
+    if (user?.email && lead) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lotleads.vercel.app';
+      sendPurchaseConfirmation({
+        buyerEmail: user.email,
+        buyerName: user.name ?? 'there',
+        leadCity: lead.city,
+        leadState: lead.state,
+        conditionScore: lead.conditionScore,
+        estimatedJobMin: lead.estimatedJobMin,
+        estimatedJobMax: lead.estimatedJobMax,
+        purchaseType: purchaseType,
+        dashboardUrl: `${appUrl}/dashboard/leads/${leadId}`,
+      }).catch(console.error);
+    }
+
     return;
   }
 
@@ -125,6 +145,8 @@ async function handleSubscriptionUpdate(sub: Stripe.Subscription) {
   const periodEnd = new Date((sub.current_period_end ?? 0) * 1000);
   const isActive = sub.status === 'active' || sub.status === 'trialing';
 
+  const wasAlreadyActive = existingSubscription?.status === 'ACTIVE';
+
   await db.subscription.upsert({
     where: { stripeSubscriptionId: sub.id },
     create: {
@@ -146,6 +168,20 @@ async function handleSubscriptionUpdate(sub: Stripe.Subscription) {
       }),
     },
   });
+
+  // Send Pro confirmation email only on new activation
+  if (isActive && !wasAlreadyActive) {
+    const user = await db.user.findUnique({ where: { id: userId }, select: { email: true, name: true } });
+    if (user?.email) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lotleads.vercel.app';
+      sendProSubscriptionConfirmation({
+        email: user.email,
+        name: user.name ?? 'there',
+        leadsPerMonth: 5,
+        dashboardUrl: `${appUrl}/dashboard`,
+      }).catch(console.error);
+    }
+  }
 }
 
 async function handleSubscriptionCancelled(sub: Stripe.Subscription) {
