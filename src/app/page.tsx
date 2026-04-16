@@ -1,379 +1,313 @@
+'use client';
 import Link from 'next/link';
-import { MapPin, Eye, Lock, TrendingUp, Shield, Zap, CheckCircle, Star, ArrowRight, Building2, Satellite } from 'lucide-react';
+import { useState } from 'react';
 
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? 'LotLeads';
-
-const TEASER_LEADS = [
-  {
-    city: 'Chicago, IL',
-    score: 9,
-    type: 'Strip mall',
-    sqft: '22,400',
-    job: '$45K–$85K',
-    tag: 'CRITICAL',
-    damages: ['Alligator cracking', 'Standing water', '4 potholes'],
-  },
-  {
-    city: 'Dallas, TX',
-    score: 8,
-    type: 'Office park',
-    sqft: '38,000',
-    job: '$72K–$130K',
-    tag: 'HIGH',
-    damages: ['Longitudinal cracking', 'Surface oxidation'],
-  },
-  {
-    city: 'Phoenix, AZ',
-    score: 7,
-    type: 'Retail center',
-    sqft: '51,200',
-    job: '$95K–$160K',
-    tag: 'HIGH',
-    damages: ['UV oxidation', 'Transverse cracks', 'Faded striping'],
-  },
+/* ── Lead card data ──────────────────────────────── */
+const LEADS = [
+  { city: 'Phoenix', type: 'Strip Mall', score: 91, urgency: 'CRITICAL', lotSqft: 28400, gradient: 'from-[#1a0a0a] to-[#0d0d1a]', scoreColor: '#FF453A', scoreGlow: 'rgba(255,69,58,0.4)', badge: 'Critical Damage', shared: 2, max: 3 },
+  { city: 'Scottsdale', type: 'Office Park', score: 87, urgency: 'CRITICAL', lotSqft: 34200, gradient: 'from-[#1a0f08] to-[#0d0d1a]', scoreColor: '#FF6B35', scoreGlow: 'rgba(255,107,53,0.4)', badge: 'Severe Cracking', shared: 1, max: 3 },
+  { city: 'Tempe', type: 'Retail Center', score: 79, urgency: 'HIGH', lotSqft: 42000, gradient: 'from-[#0d1008] to-[#0d0d1a]', scoreColor: '#FF9F0A', scoreGlow: 'rgba(255,159,10,0.3)', badge: 'High Priority', shared: 0, max: 3 },
 ];
 
-const STATS = [
-  { value: '10,800+', label: 'Lots scanned' },
-  { value: '3',       label: 'Markets active' },
-  { value: '$65',     label: 'Starting price' },
-  { value: '72hr',    label: 'Exclusivity window' },
-];
-
-const HOW_IT_WORKS = [
-  {
-    step: '01',
-    icon: Eye,
-    title: 'We scan every commercial lot',
-    desc: 'AI analyzes aerial imagery of thousands of commercial properties and scores each on a 10-point deterioration index — oxidation, cracking, alligator patterns, faded striping.',
-  },
-  {
-    step: '02',
-    icon: MapPin,
-    title: 'You see the teaser',
-    desc: 'A blurred aerial crop of the damaged lot in your market — city only, no address. You see the damage score and estimated job range. You decide if it\'s worth unlocking.',
-  },
-  {
-    step: '03',
-    icon: Lock,
-    title: 'Unlock the full lead',
-    desc: '$65 shared (max 3 contractors) or $149 exclusive (72 hours, only you). You get the address, manager name, phone, and email.',
-  },
-  {
-    step: '04',
-    icon: TrendingUp,
-    title: 'Close with evidence',
-    desc: 'Call the property manager with aerial photo evidence. You already know the damage, lot size, and estimated budget. Close rates are dramatically higher.',
-  },
-];
-
-function scoreColor(score: number) {
-  if (score >= 9) return '#FF453A';
-  if (score >= 7) return '#FF6B35';
-  return '#FF9F0A';
-}
-
-function TeaserCard({ lead, idx }: { lead: typeof TEASER_LEADS[0]; idx: number }) {
-  const color = scoreColor(lead.score);
+/* ── Score ring SVG ──────────────────────────────── */
+function ScoreRing({ score, color, glow }: { score: number; color: string; glow: string }) {
+  const r = 36, c = 2 * Math.PI * r;
+  const fill = (score / 100) * c;
   return (
-    <div
-      className="relative overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] animate-fade-up"
-      style={{ animationDelay: `${idx * 120}ms` }}
-    >
-      {/* Blurred aerial placeholder */}
-      <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1a]">
-        {/* Simulated aerial texture */}
-        <div className="absolute inset-0 bg-dot opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        {/* Central blur effect */}
-        <div className="absolute inset-4 rounded-xl bg-[rgba(255,255,255,0.03)] backdrop-blur-xl" />
-        {/* Lock */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur-sm">
-            <Lock className="h-5 w-5 text-white/70" />
-          </div>
-          <p className="text-xs font-semibold text-white/60">{lead.type} · {lead.city}</p>
-        </div>
-        {/* Score badge */}
-        <div
-          className="absolute left-3 bottom-3 flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold backdrop-blur-sm"
-          style={{ borderColor: `${color}40`, background: `${color}18`, color }}
-        >
-          <span className="font-mono">{lead.score}/10</span>
-          <span>·</span>
-          <span>{lead.tag}</span>
-        </div>
-      </div>
-
-      <div className="p-4 space-y-3">
-        <div>
-          <p className="text-xs text-ink-faint uppercase tracking-wider">{lead.type}</p>
-          <p className="text-sm font-semibold text-ink flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-ink-muted" />
-            {lead.city}
-          </p>
-        </div>
-        <div className="rounded-lg border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-3">
-          <p className="text-[10px] uppercase tracking-wider text-ink-faint">Est. Job Size</p>
-          <p className="font-mono text-base font-bold text-ink mt-0.5">{lead.job}</p>
-          <p className="text-[11px] text-ink-muted mt-0.5">{lead.sqft} sq ft · based on NPCA rates</p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {lead.damages.slice(0, 2).map(d => (
-            <span key={d} className="rounded-full border border-score-high/20 bg-score-high/8 px-2.5 py-0.5 text-[10px] font-medium text-score-high">
-              {d}
-            </span>
-          ))}
-        </div>
-        <div className="rounded-lg border border-[rgba(255,255,255,0.05)] px-3 py-2">
-          <p className="font-mono text-xs text-ink-faint select-none">████████ ████ · ████@████.com</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          <div className="rounded-lg border border-[rgba(255,255,255,0.1)] py-2 text-center text-xs font-semibold text-ink-muted">
-            Shared $65
-          </div>
-          <div className="rounded-lg bg-accent py-2 text-center text-xs font-semibold text-white shadow-glow-accent">
-            Exclusive $149
-          </div>
-        </div>
+    <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+      <svg width="90" height="90" style={{ transform: 'rotate(-90deg)', position: 'absolute', inset: 0 }}>
+        <circle cx="45" cy="45" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
+        <circle cx="45" cy="45" r={r} fill="none" stroke={color} strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${fill} ${c}`}
+          style={{ filter: `drop-shadow(0 0 8px ${glow})` }} />
+      </svg>
+      <div className="relative text-center z-10">
+        <div className="font-mono text-xl font-bold leading-none" style={{ color, textShadow: `0 0 12px ${glow}` }}>{score}</div>
+        <div className="text-[9px] font-semibold text-white/40 mt-0.5 tracking-widest">SCORE</div>
       </div>
     </div>
   );
 }
 
-export default function HomePage() {
+/* ── Lead card ───────────────────────────────────── */
+function LeadCard({ lead, idx }: { lead: typeof LEADS[0]; idx: number }) {
   return (
-    <div className="min-h-screen bg-base">
-      {/* ── Nav ───────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[rgba(255,255,255,0.06)] bg-base/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/15">
-              <Building2 className="h-4 w-4 text-accent" />
+    <div
+      className="group relative overflow-hidden rounded-2xl border border-white/[0.07] cursor-pointer transition-all duration-300 hover:border-white/[0.14] hover:translate-y-[-2px]"
+      style={{
+        background: 'linear-gradient(160deg, #0f0f20 0%, #0a0a16 100%)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.5)',
+        animationDelay: `${idx * 100}ms`,
+      }}
+    >
+      {/* Aerial image placeholder with scan lines */}
+      <div className={`relative h-48 overflow-hidden bg-gradient-to-br ${lead.gradient}`}>
+        <div className="absolute inset-0 bg-dot opacity-30" />
+        {/* Simulated aerial grid */}
+        <div className="absolute inset-0 bg-grid opacity-20" style={{ backgroundSize: '20px 20px' }} />
+        {/* Damage heat overlay */}
+        <div className="absolute inset-0" style={{
+          background: `radial-gradient(ellipse 60% 40% at 35% 55%, ${lead.scoreColor}20 0%, transparent 70%)`
+        }} />
+        {/* Scan line sweep */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-x-0 h-px opacity-40 animate-pulse" style={{ top: '55%', background: `linear-gradient(90deg, transparent, ${lead.scoreColor}, transparent)` }} />
+        </div>
+        {/* Corner crosshairs */}
+        <div className="absolute top-3 left-3 w-4 h-4 border-t border-l opacity-60" style={{ borderColor: lead.scoreColor }} />
+        <div className="absolute top-3 right-3 w-4 h-4 border-t border-r opacity-60" style={{ borderColor: lead.scoreColor }} />
+        <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l opacity-60" style={{ borderColor: lead.scoreColor }} />
+        <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r opacity-60" style={{ borderColor: lead.scoreColor }} />
+        {/* Locked overlay */}
+        <div className="absolute inset-0 backdrop-blur-[10px]" style={{ background: 'rgba(5,5,15,0.55)' }} />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/50 backdrop-blur">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <span className="text-[10px] font-semibold tracking-widest text-white/40 uppercase">Unlock to view</span>
+        </div>
+        {/* Score badge top-right */}
+        <div className="absolute top-3 right-3 z-10">
+          <span className="rounded-full px-2.5 py-1 text-[10px] font-bold tracking-widest border"
+            style={{ borderColor: `${lead.scoreColor}50`, background: `${lead.scoreColor}18`, color: lead.scoreColor }}>
+            {lead.urgency}
+          </span>
+        </div>
+      </div>
+
+      {/* Card body */}
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="text-[11px] font-semibold tracking-widest text-white/35 uppercase mb-1">{lead.type}</div>
+            <div className="text-lg font-bold text-white/90 tracking-tight">{lead.city}, AZ</div>
+          </div>
+          <ScoreRing score={lead.score} color={lead.scoreColor} glow={lead.scoreGlow} />
+        </div>
+
+        {/* Blurred address */}
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 mb-4">
+          <div className="text-[10px] font-semibold tracking-widest text-white/30 uppercase mb-2">Property Address</div>
+          <div className="h-4 rounded bg-white/10 blur-sm w-3/4 mb-1.5" />
+          <div className="h-3 rounded bg-white/07 blur-sm w-1/2" />
+        </div>
+
+        {/* Meta row */}
+        <div className="flex items-center justify-between text-xs mb-4">
+          <span className="font-mono text-white/40">{(lead.lotSqft / 1000).toFixed(1)}k sq ft</span>
+          <span className="text-white/40">·</span>
+          <span className="text-white/40">{lead.shared}/{lead.max} buyers</span>
+          <span className="text-white/40">·</span>
+          <span className="font-mono text-white/50">$65</span>
+        </div>
+
+        {/* CTA */}
+        <Link href="/leads"
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200"
+          style={{ background: lead.scoreColor, color: '#fff', boxShadow: `0 4px 16px ${lead.scoreGlow}` }}>
+          Unlock Lead
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main page ───────────────────────────────────── */
+export default function HomePage() {
+  const [activeStep, setActiveStep] = useState(0);
+
+  return (
+    <div style={{ background: '#05050F', minHeight: '100vh', color: '#F0F4FF' }}>
+
+      {/* ── Nav ──────────────────────────────────────── */}
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,5,15,0.85)', backdropFilter: 'blur(20px)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(14,165,233,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(14,165,233,0.25)' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             </div>
-            <span className="font-semibold text-ink tracking-tight">{APP_NAME}</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/leads" className="hidden text-sm text-ink-muted hover:text-ink transition-colors sm:block">Browse leads</Link>
-            <Link href="/auth/login" className="text-sm text-ink-muted hover:text-ink transition-colors">Sign in</Link>
-            <Link href="/auth/signup" className="btn-primary py-2 px-4 text-sm">
-              Get access
-            </Link>
+            <span style={{ fontWeight: 700, fontSize: 15, letterSpacing: '-0.02em', color: '#F0F4FF' }}>LotLeads</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link href="/leads" style={{ fontSize: 13, color: 'rgba(240,244,255,0.5)', padding: '6px 12px', borderRadius: 8, textDecoration: 'none', transition: 'color 0.2s' }}>Browse Leads</Link>
+            <Link href="#pricing" style={{ fontSize: 13, color: 'rgba(240,244,255,0.5)', padding: '6px 12px', borderRadius: 8, textDecoration: 'none' }}>Pricing</Link>
+            <Link href="/auth/signin" style={{ fontSize: 13, color: 'rgba(240,244,255,0.5)', padding: '6px 12px', borderRadius: 8, textDecoration: 'none' }}>Sign in</Link>
+            <Link href="/leads" style={{ fontSize: 13, fontWeight: 600, color: '#fff', background: '#0EA5E9', padding: '7px 16px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(14,165,233,0.3)' }}>Browse Leads</Link>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ─────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
-        {/* Grid background */}
-        <div className="absolute inset-0 bg-grid opacity-50" style={{ backgroundSize: '40px 40px' }} />
+      {/* ── Hero ─────────────────────────────────────── */}
+      <section style={{ position: 'relative', paddingTop: 140, paddingBottom: 80, overflow: 'hidden', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        {/* Radial glow */}
+        <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 600, background: 'radial-gradient(ellipse, rgba(14,165,233,0.18) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        {/* Grid */}
+        <div className="absolute inset-0 bg-grid" style={{ backgroundSize: '44px 44px', opacity: 0.4 }} />
+        {/* Scan line */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(14,165,233,0.04) 0%, transparent 30%, transparent 70%, rgba(14,165,233,0.03) 100%)' }} />
 
-        {/* Radial accent glow */}
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[900px] rounded-full opacity-20"
-          style={{ background: 'radial-gradient(ellipse, rgba(14,165,233,0.4) 0%, transparent 70%)' }}
-        />
-
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 text-center">
-          {/* Label */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/8 px-4 py-1.5 text-xs font-medium text-accent-bright animate-fade-up">
-            <Satellite className="h-3.5 w-3.5" />
-            AI-powered commercial parking lot intelligence
+        <div style={{ position: 'relative', maxWidth: 900, margin: '0 auto', padding: '0 24px', textAlign: 'center', width: '100%' }}>
+          {/* Badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 99, border: '1px solid rgba(14,165,233,0.3)', background: 'rgba(14,165,233,0.08)', padding: '6px 16px', marginBottom: 32 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0EA5E9', boxShadow: '0 0 8px rgba(14,165,233,0.8)', display: 'inline-block' }} />
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', color: '#38BDF8', textTransform: 'uppercase' }}>AI-Powered Aerial Lead Detection</span>
           </div>
 
-          {/* Headline */}
-          <h1
-            className="mb-6 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl animate-fade-up"
-            style={{ animationDelay: '80ms', letterSpacing: '-0.02em' }}
-          >
-            Find deteriorated lots{' '}
-            <span
-              className="text-glow-accent"
-              style={{ color: '#38BDF8' }}
-            >
-              before your competition
-            </span>
+          {/* Headline — this is where Apple/Tesla energy lives */}
+          <h1 style={{ fontSize: 'clamp(44px, 7vw, 88px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.02, marginBottom: 28, color: '#F0F4FF' }}>
+            Find commercial lots<br />
+            <span style={{ color: '#38BDF8', textShadow: '0 0 60px rgba(56,189,248,0.4)' }}>before your competition</span><br />
+            <span style={{ color: 'rgba(240,244,255,0.5)', fontWeight: 400 }}>even looks.</span>
           </h1>
 
-          {/* Sub */}
-          <p
-            className="mx-auto mb-10 max-w-2xl text-lg text-ink-muted leading-relaxed animate-fade-up"
-            style={{ animationDelay: '140ms' }}
-          >
-            AI scans thousands of commercial properties every week. We score the damage, estimate the job,
-            and deliver the property manager's contact — all before you make a single call.
+          <p style={{ fontSize: 18, color: 'rgba(122,139,181,1)', lineHeight: 1.65, maxWidth: 560, margin: '0 auto 40px', fontWeight: 400 }}>
+            AI scans aerial imagery of every commercial property daily. Oxidized asphalt, failed striping, alligator cracking — flagged and ready. Evidence package delivered before your phone rings.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center animate-fade-up" style={{ animationDelay: '200ms' }}>
-            <Link href="/leads" className="btn-primary py-3.5 px-8 text-base">
-              Browse live leads
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="/auth/signup" className="btn-ghost py-3.5 px-8 text-sm">
-              Create free account
-            </Link>
-          </div>
-
-          {/* Stats bar */}
-          <div
-            className="mx-auto mt-16 grid max-w-2xl grid-cols-2 gap-px rounded-2xl overflow-hidden border border-[rgba(255,255,255,0.08)] sm:grid-cols-4 animate-fade-up"
-            style={{ animationDelay: '280ms' }}
-          >
-            {STATS.map(s => (
-              <div key={s.label} className="bg-[rgba(255,255,255,0.025)] px-4 py-5 text-center">
-                <p className="font-mono text-2xl font-bold text-ink">{s.value}</p>
-                <p className="mt-0.5 text-xs text-ink-muted uppercase tracking-wider">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Teaser cards ─────────────────── */}
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="mb-10 flex items-end justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-accent mb-2">Live intelligence feed</p>
-              <h2 className="text-2xl font-bold text-ink tracking-tight">Recent leads — blurred until unlocked</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link href="/leads" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#0EA5E9', color: '#fff', fontWeight: 700, fontSize: 15, borderRadius: 14, padding: '14px 28px', textDecoration: 'none', boxShadow: '0 4px 24px rgba(14,165,233,0.4)', letterSpacing: '-0.01em' }}>
+                Browse Live Leads
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </Link>
+              <a href="#how-it-works" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', color: 'rgba(240,244,255,0.7)', fontWeight: 600, fontSize: 15, borderRadius: 14, padding: '14px 28px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)' }}>
+                See how it works
+              </a>
             </div>
-            <Link href="/leads" className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent-bright transition-colors">
-              View all leads
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {TEASER_LEADS.map((lead, i) => (
-              <TeaserCard key={lead.city} lead={lead} idx={i} />
-            ))}
+            <p style={{ fontSize: 12, color: 'rgba(122,139,181,0.6)', letterSpacing: '0.05em' }}>No credit card · First lead free · Cancel anytime</p>
           </div>
         </div>
       </section>
 
-      {/* ── How it works ─────────────────── */}
-      <section className="py-16 sm:py-24 border-t border-[rgba(255,255,255,0.05)]">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="mb-12 text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-accent mb-3">The process</p>
-            <h2 className="text-3xl font-bold text-ink tracking-tight">How it works</h2>
+      {/* ── Stats — BIG numbers, Tesla spec-page energy ── */}
+      <section style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+          {[
+            { num: '12,847', label: 'Lots Monitored', sub: 'Phoenix metro' },
+            { num: '94', label: 'Avg Condition Score', sub: 'On critical leads' },
+            { num: '$65', label: 'Per Lead', sub: 'Shared · 3 buyers max' },
+            { num: '72hr', label: 'Exclusivity Window', sub: 'On exclusive leads' },
+          ].map((s) => (
+            <div key={s.label} style={{ padding: '40px 24px', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="font-mono" style={{ fontSize: 'clamp(28px, 3.5vw, 48px)', fontWeight: 700, color: '#38BDF8', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 8 }}>{s.num}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(240,244,255,0.7)', marginBottom: 4 }}>{s.label}</div>
+              <div style={{ fontSize: 11, color: 'rgba(122,139,181,0.6)', letterSpacing: '0.04em' }}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Live lead preview ─────────────────────────── */}
+      <section style={{ padding: '100px 24px', background: '#05050F' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ marginBottom: 56, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: '#0EA5E9', textTransform: 'uppercase', marginBottom: 12 }}>Live Intelligence Feed</div>
+              <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, letterSpacing: '-0.03em', color: '#F0F4FF', margin: 0 }}>
+                Lots found<br /><span style={{ color: 'rgba(240,244,255,0.4)', fontWeight: 400 }}>this week.</span>
+              </h2>
+            </div>
+            <Link href="/leads" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#38BDF8', textDecoration: 'none', border: '1px solid rgba(14,165,233,0.25)', borderRadius: 10, padding: '8px 16px' }}>
+              View all leads
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </Link>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            {HOW_IT_WORKS.map((step, i) => (
-              <div
-                key={step.step}
-                className="glass rounded-xl p-6 animate-fade-up"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <div className="mb-4 flex items-start gap-4">
-                  <span className="font-mono text-3xl font-bold text-ink-faint">{step.step}</span>
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 mt-1">
-                    <step.icon className="h-4.5 w-4.5 text-accent" />
-                  </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+            {LEADS.map((lead, idx) => <LeadCard key={lead.city} lead={lead} idx={idx} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it works ─────────────────────────────── */}
+      <section id="how-it-works" style={{ padding: '100px 24px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(180deg, #060612 0%, #05050F 100%)' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 72 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: '#0EA5E9', textTransform: 'uppercase', marginBottom: 12 }}>The System</div>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, letterSpacing: '-0.03em', color: '#F0F4FF', margin: 0 }}>Automated. Every day. Zero effort on your end.</h2>
+          </div>
+
+          <div style={{ display: 'grid', gap: 20 }}>
+            {[
+              { n: '01', title: 'Aerial scan', desc: 'AI processes satellite imagery across 12,000+ commercial properties daily. Oxidation, cracking, alligator patterns, failed striping — all flagged automatically.' },
+              { n: '02', title: 'Score and rank', desc: 'Each lot receives a deterioration score from 1–100. Only lots scoring above 60 enter the intelligence feed. You see the worst lots first.' },
+              { n: '03', title: 'Evidence package', desc: 'Aerial photo crop, estimated repair value, owner name, mailing address, and property details — bundled and ready when you unlock.' },
+              { n: '04', title: 'You close the deal', desc: 'Show up with evidence they can\'t argue with. Aerial proof of damage + your quote = closed. Your competitors are still cold-calling blind.' },
+            ].map((step, i) => (
+              <div key={step.n} onClick={() => setActiveStep(i)}
+                style={{
+                  display: 'flex', gap: 24, padding: '28px 32px', borderRadius: 16, cursor: 'pointer',
+                  border: `1px solid ${activeStep === i ? 'rgba(14,165,233,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                  background: activeStep === i ? 'rgba(14,165,233,0.05)' : 'rgba(255,255,255,0.015)',
+                  transition: 'all 0.2s',
+                }}>
+                <div className="font-mono" style={{ fontSize: 12, fontWeight: 700, color: activeStep === i ? '#38BDF8' : 'rgba(122,139,181,0.4)', letterSpacing: '0.05em', minWidth: 28, paddingTop: 3 }}>{step.n}</div>
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: activeStep === i ? '#F0F4FF' : 'rgba(240,244,255,0.7)', letterSpacing: '-0.02em', marginBottom: 8, margin: '0 0 8px' }}>{step.title}</h3>
+                  <p style={{ fontSize: 14, color: 'rgba(122,139,181,0.8)', lineHeight: 1.65, margin: 0 }}>{step.desc}</p>
                 </div>
-                <h3 className="mb-2 text-base font-semibold text-ink">{step.title}</h3>
-                <p className="text-sm text-ink-muted leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Pricing ──────────────────────── */}
-      <section className="py-16 sm:py-24 border-t border-[rgba(255,255,255,0.05)]">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="mb-12 text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-accent mb-3">Pricing</p>
-            <h2 className="text-3xl font-bold text-ink tracking-tight">Pay per lead. No subscriptions required.</h2>
-            <p className="mt-3 text-ink-muted">Or go Pro for territory exclusivity and automatic delivery.</p>
+      {/* ── Pricing ───────────────────────────────────── */}
+      <section id="pricing" style={{ padding: '100px 24px', background: '#05050F', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', color: '#0EA5E9', textTransform: 'uppercase', marginBottom: 12 }}>Pricing</div>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, letterSpacing: '-0.03em', color: '#F0F4FF', margin: '0 0 16px' }}>Pay for what you use.</h2>
+            <p style={{ fontSize: 16, color: 'rgba(122,139,181,0.8)', margin: 0 }}>No subscriptions required. Buy a lead, close a job.</p>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-3">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             {[
-              {
-                name: 'Shared Lead',
-                price: '$65',
-                per: 'per lead',
-                highlight: false,
-                badge: null,
-                features: [
-                  'Aerial photo evidence',
-                  'Property address + parcel data',
-                  'Manager name, phone & email',
-                  'AI damage score + report',
-                  'Estimated job range',
-                  'Sold to max 3 contractors',
-                ],
-              },
-              {
-                name: 'Exclusive Lead',
-                price: '$149',
-                per: 'per lead',
-                highlight: true,
-                badge: 'Most popular',
-                features: [
-                  'Everything in Shared',
-                  '72-hr exclusivity window',
-                  'Only you in your market',
-                  'Aerial photo evidence',
-                  'Property manager contact',
-                  'Enters shared pool after 72hr',
-                ],
-              },
-              {
-                name: 'Pro',
-                price: '$297',
-                per: 'per month',
-                highlight: false,
-                badge: null,
-                features: [
-                  '5 exclusive leads per month',
-                  'Auto-delivered to your inbox',
-                  'Territory badge (claimed market)',
-                  'Priority scoring queue',
-                  'SkyFi premium images included',
-                  'Cancel anytime',
-                ],
-              },
-            ].map(plan => (
-              <div
-                key={plan.name}
-                className={`relative rounded-2xl p-6 ${
-                  plan.highlight
-                    ? 'border border-accent/40 bg-accent/5 shadow-glow-accent'
-                    : 'glass'
-                }`}
-              >
-                {plan.badge && (
-                  <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-2.5 py-1 text-[10px] font-bold text-accent-bright uppercase tracking-wider">
-                    <Star className="h-3 w-3" />
-                    {plan.badge}
-                  </div>
+              { name: 'Shared Lead', price: '$65', unit: 'per lead', highlight: false, accent: 'rgba(14,165,233,0.8)', features: ['Up to 3 buyers total', 'Full aerial evidence package', 'Owner name + address', 'Deterioration score', 'Property details'] },
+              { name: 'Exclusive Lead', price: '$149', unit: 'per lead', highlight: true, accent: '#38BDF8', features: ['Only you for 72 hours', 'First-mover advantage', 'Full aerial evidence package', 'Owner name + address', 'SkyFi high-res add-on'] },
+              { name: 'Pro Territory', price: '$297', unit: 'per month', highlight: false, accent: 'rgba(14,165,233,0.8)', features: ['5 exclusive leads / mo', 'Territory badge', 'Priority new lot alerts', 'Everything in Exclusive', 'Dedicated market'] },
+            ].map((tier) => (
+              <div key={tier.name} style={{
+                borderRadius: 20, padding: '32px 28px',
+                border: `1px solid ${tier.highlight ? 'rgba(56,189,248,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                background: tier.highlight ? 'linear-gradient(160deg, rgba(14,165,233,0.08) 0%, rgba(5,5,15,0.95) 100%)' : 'rgba(255,255,255,0.02)',
+                boxShadow: tier.highlight ? '0 0 40px rgba(14,165,233,0.12), 0 8px 32px rgba(0,0,0,0.4)' : '0 4px 24px rgba(0,0,0,0.3)',
+                position: 'relative',
+              }}>
+                {tier.highlight && (
+                  <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#0EA5E9', color: '#fff', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', padding: '4px 14px', borderRadius: 99, textTransform: 'uppercase' }}>Most Popular</div>
                 )}
-                <h3 className="text-base font-semibold text-ink">{plan.name}</h3>
-                <div className="mt-2 flex items-baseline gap-1.5">
-                  <span className="font-mono text-3xl font-bold text-ink">{plan.price}</span>
-                  <span className="text-sm text-ink-muted">{plan.per}</span>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(122,139,181,0.6)', textTransform: 'uppercase', marginBottom: 8 }}>{tier.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span className="font-mono" style={{ fontSize: 44, fontWeight: 700, letterSpacing: '-0.04em', color: tier.accent }}>{tier.price}</span>
+                    <span style={{ fontSize: 12, color: 'rgba(122,139,181,0.5)' }}>{tier.unit}</span>
+                  </div>
                 </div>
-                <ul className="mt-5 space-y-2.5">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-ink-muted">
-                      <CheckCircle className="h-4 w-4 shrink-0 text-accent/70 mt-px" />
-                      {f}
-                    </li>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 20, marginBottom: 24 }}>
+                  {tier.features.map((f) => (
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(14,165,233,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0EA5E9" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </div>
+                      <span style={{ fontSize: 13, color: 'rgba(240,244,255,0.6)' }}>{f}</span>
+                    </div>
                   ))}
-                </ul>
-                <Link
-                  href={plan.name === 'Pro' ? '/auth/signup?plan=pro' : '/leads'}
-                  className={`mt-6 block rounded-xl py-2.5 text-center text-sm font-semibold transition-all ${
-                    plan.highlight
-                      ? 'bg-accent text-white hover:bg-accent-bright shadow-glow-accent'
-                      : 'border border-[rgba(255,255,255,0.12)] text-ink-muted hover:border-[rgba(255,255,255,0.25)] hover:text-ink'
-                  }`}
-                >
-                  {plan.name === 'Pro' ? 'Start Pro' : 'Browse leads'}
+                </div>
+                <Link href="/leads" style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '12px 20px', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none',
+                  background: tier.highlight ? '#0EA5E9' : 'rgba(255,255,255,0.05)',
+                  color: tier.highlight ? '#fff' : 'rgba(240,244,255,0.7)',
+                  border: tier.highlight ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: tier.highlight ? '0 4px 20px rgba(14,165,233,0.35)' : 'none',
+                }}>
+                  {tier.name === 'Pro Territory' ? 'Join Pro' : 'Get Started'}
                 </Link>
               </div>
             ))}
@@ -381,59 +315,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Trust signals ─────────────────── */}
-      <section className="py-16 border-t border-[rgba(255,255,255,0.05)]">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="grid gap-6 sm:grid-cols-3 text-center">
-            {[
-              { Icon: Shield,       title: 'Verified data',       desc: 'Owner contacts sourced from county assessor records via Regrid API.' },
-              { Icon: Satellite,    title: 'Real aerial imagery',  desc: 'Google Maps + SkyFi satellite imagery. Not stock photos or estimates.' },
-              { Icon: Zap,          title: 'Instant delivery',     desc: 'Pay → unlock → contact info delivered in under 3 seconds.' },
-            ].map(({ Icon, title, desc }) => (
-              <div key={title} className="glass rounded-xl p-6">
-                <div className="mb-3 flex justify-center">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
-                    <Icon className="h-5 w-5 text-accent" />
-                  </div>
-                </div>
-                <h3 className="mb-2 text-sm font-semibold text-ink">{title}</h3>
-                <p className="text-xs text-ink-muted leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ──────────────────────────── */}
-      <section className="py-20 border-t border-[rgba(255,255,255,0.05)]">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-          <h2 className="text-3xl font-bold text-ink tracking-tight mb-4">
-            Your next $80K job is already deteriorating.
+      {/* ── CTA ───────────────────────────────────────── */}
+      <section style={{ padding: '120px 24px', background: 'linear-gradient(180deg, #05050F 0%, #080816 100%)', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 700, height: 400, background: 'radial-gradient(ellipse, rgba(14,165,233,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 700, letterSpacing: '-0.04em', color: '#F0F4FF', margin: '0 0 20px', lineHeight: 1.05 }}>
+            Your next big job<br />
+            <span style={{ color: '#38BDF8', textShadow: '0 0 40px rgba(56,189,248,0.3)' }}>is already on the map.</span>
           </h2>
-          <p className="mb-8 text-ink-muted">
-            While your competition is cold calling lists, you'll be walking in with aerial photos and a cost estimate. That's the difference.
-          </p>
-          <Link href="/leads" className="btn-primary py-3.5 px-10 text-base animate-pulse-glow">
-            Browse live leads →
+          <p style={{ fontSize: 17, color: 'rgba(122,139,181,0.75)', margin: '0 0 40px' }}>First lead is on us. See exactly what your competition is missing.</p>
+          <Link href="/leads" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#0EA5E9', color: '#fff', fontWeight: 700, fontSize: 16, borderRadius: 16, padding: '16px 36px', textDecoration: 'none', boxShadow: '0 8px 32px rgba(14,165,233,0.4)', letterSpacing: '-0.01em' }}>
+            Browse Available Leads
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────── */}
-      <footer className="border-t border-[rgba(255,255,255,0.05)] py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between text-xs text-ink-muted">
-          <div className="flex items-center gap-2">
-            <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/15">
-              <Building2 className="h-3 w-3 text-accent" />
-            </div>
-            <span className="font-medium text-ink">{APP_NAME}</span>
+      {/* ── Footer ────────────────────────────────────── */}
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '32px 24px', background: '#05050F' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(240,244,255,0.4)', letterSpacing: '-0.01em' }}>LotLeads</span>
+          <span style={{ fontSize: 12, color: 'rgba(122,139,181,0.4)' }}>© 2026 LotLeads. AI parking lot intelligence.</span>
+          <div style={{ display: 'flex', gap: 20 }}>
+            {['Privacy', 'Terms', 'Contact'].map(l => <a key={l} href="#" style={{ fontSize: 12, color: 'rgba(122,139,181,0.4)', textDecoration: 'none' }}>{l}</a>)}
           </div>
-          <div className="flex items-center gap-5">
-            <Link href="/privacy" className="hover:text-ink transition-colors">Privacy</Link>
-            <Link href="/terms"   className="hover:text-ink transition-colors">Terms</Link>
-            <Link href="/leads"   className="hover:text-ink transition-colors">Browse leads</Link>
-          </div>
-          <p>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
         </div>
       </footer>
     </div>
