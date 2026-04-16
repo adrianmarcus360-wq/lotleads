@@ -206,10 +206,15 @@ async function main() {
     console.log(`Generated ${rawLots.length} synthetic lot coordinates`);
   }
 
-  // Filter to high-quality lots (has lat/lng)
-  const validLots = rawLots
-    .filter((l) => l.lat && l.lng && Math.abs(l.lat) > 0 && Math.abs(l.lng) > 0)
-    .slice(0, 500); // Cap at 500 for initial seed
+  // Filter to high-quality lots (has lat/lng), shuffle to spread across markets
+  const allValid = rawLots.filter((l) => l.lat && l.lng && Math.abs(l.lat) > 0 && Math.abs(l.lng) > 0);
+  // Take proportional samples per market (up to 160 per market = 480 total)
+  const marketBuckets: Record<string, typeof allValid> = {};
+  for (const lot of allValid) { (marketBuckets[lot.market] = marketBuckets[lot.market] ?? []).push(lot); }
+  const validLots = Object.values(marketBuckets).flatMap(lots => {
+    const shuffled = lots.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 160);
+  });
 
   console.log(`\n📊 Processing ${validLots.length} lots...`);
 
