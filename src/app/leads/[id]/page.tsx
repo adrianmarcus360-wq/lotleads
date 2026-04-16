@@ -8,6 +8,7 @@ import {
   Phone, Mail, User, Loader2, Star, ChevronDown, ChevronUp,
   Calculator, Satellite, Info, Zap,
 } from 'lucide-react';
+import MapPreview from '@/components/MapPreview';
 import { getConditionLabel, formatCurrency } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
@@ -276,18 +277,12 @@ function EstimateCalculator({ lead }: { lead: Lead }) {
    SKYFI TEASER (post-purchase add-on)
 ───────────────────────────────────────────── */
 function SkyFiTeaser({ lead }: { lead: Lead }) {
-  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lead.lat},${lead.lng}&zoom=19&size=800x400&maptype=satellite&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''}`;
-
+  
   return (
     <div className="glass rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)]">
       {/* Blurred satellite teaser */}
       <div className="relative h-40 overflow-hidden">
-        <img
-          src={mapUrl}
-          alt="High-resolution satellite preview"
-          className="h-full w-full object-cover blur-locked"
-          loading="lazy"
-        />
+        <MapPreview lat={lead.lat} lng={lead.lng} zoom={19} className="h-full w-full object-cover" />
         {/* Scan lines overlay */}
         <div className="scan-lines absolute inset-0" />
         {/* Frost overlay */}
@@ -407,7 +402,6 @@ export default function LeadDetailPage() {
 
   // Map image: locked = blurred crop, unlocked = full precise location
   const mapZoom       = lead.locked ? 16 : 18;
-  const mapUrl        = `https://staticmap.openstreetmap.de/staticmap.php?center=${lead.lat},${lead.lng}&zoom=${mapZoom}&size=800x400&markers=${lead.lat},${lead.lng}`;
   const googleMapsUrl = `https://www.google.com/maps/@${lead.lat},${lead.lng},18z`;
 
   const vaguePropType: Record<string, string> = {
@@ -460,12 +454,7 @@ export default function LeadDetailPage() {
             {/* Map / aerial image */}
             <div className="relative overflow-hidden rounded-2xl" style={{ height: 320 }}>
               {/* Base image */}
-              <img
-                src={mapUrl}
-                alt="Lot aerial view"
-                className={`h-full w-full object-cover transition-all duration-500 ${lead.locked ? 'blur-locked' : ''}`}
-                loading="lazy"
-              />
+              <MapPreview lat={lead.lat} lng={lead.lng} zoom={lead.locked ? 16 : 18} className={`h-full w-full transition-all duration-500 ${lead.locked ? 'blur-locked' : ''}`} />
 
               {/* Scan lines for teaser feel */}
               {lead.locked && <div className="scan-lines absolute inset-0 pointer-events-none" />}

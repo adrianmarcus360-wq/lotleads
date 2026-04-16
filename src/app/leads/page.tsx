@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { MapPin, Lock, Zap, Building2, Star } from 'lucide-react';
+import MapPreview from '@/components/MapPreview';
 import { formatCurrency } from '@/lib/utils';
 
 type Lead = {
@@ -77,7 +78,6 @@ function LeadCard({ lead, index }: { lead: Lead; index: number }) {
   const isExcLocked    = lead.exclusiveBuyerId && lead.exclusiveExpiresAt && new Date(lead.exclusiveExpiresAt) > new Date();
   const vagueType      = PROP_TYPE_LABELS[lead.propertyType] ?? 'Commercial Lot';
   const slotsLeft      = lead.maxSharedBuyers - lead.sharedBuyerCount;
-  const mapUrl         = `https://staticmap.openstreetmap.de/staticmap.php?center=${lead.lat},${lead.lng}&zoom=16&size=600x300&markers=${lead.lat},${lead.lng}`;
   const color          = scoreColor(lead.conditionScore);
 
   return (
@@ -88,12 +88,7 @@ function LeadCard({ lead, index }: { lead: Lead; index: number }) {
     >
       {/* Aerial teaser */}
       <div className="relative h-44 overflow-hidden">
-        <img
-          src={mapUrl}
-          alt="Lot aerial"
-          className="h-full w-full object-cover blur-locked group-hover:brightness-75 transition-all duration-500"
-          loading="lazy"
-        />
+        <MapPreview lat={lead.lat} lng={lead.lng} zoom={16} className="h-full w-full blur-locked group-hover:brightness-75 transition-all duration-500" />
         {/* Scan lines */}
         <div className="scan-lines absolute inset-0 pointer-events-none" />
         {/* Gradient */}
