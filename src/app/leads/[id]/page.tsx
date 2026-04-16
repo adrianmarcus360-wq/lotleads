@@ -8,7 +8,7 @@ import {
   Phone, Mail, User, Loader2, Star, ChevronDown, ChevronUp,
   Calculator, Satellite, Info, Zap,
 } from 'lucide-react';
-import MapPreview from '@/components/MapPreview';
+import LotImage from '@/components/LotImage';
 import { getConditionLabel, formatCurrency } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
@@ -282,7 +282,7 @@ function SkyFiTeaser({ lead }: { lead: Lead }) {
     <div className="glass rounded-xl overflow-hidden border border-[rgba(255,255,255,0.07)]">
       {/* Blurred satellite teaser */}
       <div className="relative h-40 overflow-hidden">
-        <MapPreview lat={lead.lat} lng={lead.lng} zoom={19} className="h-full w-full object-cover" />
+        <LotImage lat={lead.lat} lng={lead.lng} zoom={19} className="h-full w-full object-cover" />
         {/* Scan lines overlay */}
         <div className="scan-lines absolute inset-0" />
         {/* Frost overlay */}
@@ -454,7 +454,7 @@ export default function LeadDetailPage() {
             {/* Map / aerial image */}
             <div className="relative overflow-hidden rounded-2xl" style={{ height: 320 }}>
               {/* Base image */}
-              <MapPreview lat={lead.lat} lng={lead.lng} zoom={lead.locked ? 16 : 18} className={`h-full w-full transition-all duration-500 ${lead.locked ? 'blur-locked' : ''}`} />
+              <LotImage lat={lead.lat} lng={lead.lng} zoom={lead.locked ? 19 : 18} className={`h-full w-full transition-all duration-500 ${lead.locked ? 'blur-locked' : ''}`} />
 
               {/* Scan lines for teaser feel */}
               {lead.locked && <div className="scan-lines absolute inset-0 pointer-events-none" />}
