@@ -2,13 +2,14 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+// Space Grotesk loaded via @import in globals.css for full weight control
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME ?? 'LotLeads';
 
 export const metadata: Metadata = {
   title: {
-    default: `${appName} — Commercial Parking Lot Leads for Paving Contractors`,
+    default: `${appName} — AI Parking Lot Intelligence for Paving Contractors`,
     template: `%s | ${appName}`,
   },
   description:
@@ -23,11 +24,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <meta name="color-scheme" content="dark" />
       </head>
-      <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
+      <body className={`${inter.variable} bg-base text-ink antialiased`}>
         {children}
       </body>
     </html>

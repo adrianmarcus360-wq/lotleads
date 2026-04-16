@@ -2,37 +2,254 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────
+   LOTLEADS DESIGN SYSTEM — DARK FUTURISTIC
+   Apple precision × Tesla dark interface
+   ───────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --border: 214.3 31.8% 91.4%;
-  --radius: 0.5rem;
+  /* Core backgrounds */
+  --bg-base:        #05050F;
+  --bg-surface:     #0A0A1A;
+  --bg-elevated:    #0F0F22;
+  --bg-glass:       rgba(255, 255, 255, 0.03);
+  --bg-glass-hover: rgba(255, 255, 255, 0.055);
+
+  /* Borders */
+  --border:         rgba(255, 255, 255, 0.07);
+  --border-bright:  rgba(255, 255, 255, 0.13);
+  --border-accent:  rgba(0, 180, 255, 0.25);
+
+  /* Text */
+  --text-primary:   #F0F4FF;
+  --text-secondary: #7A8BB5;
+  --text-muted:     #3D4A6B;
+  --text-inverse:   #05050F;
+
+  /* Brand accent */
+  --accent:         #0EA5E9;
+  --accent-bright:  #38BDF8;
+  --accent-dim:     rgba(14, 165, 233, 0.15);
+  --accent-glow:    rgba(14, 165, 233, 0.3);
+
+  /* Score colors */
+  --score-critical: #FF453A;
+  --score-high:     #FF6B35;
+  --score-medium:   #FF9F0A;
+  --score-low:      #30D158;
+
+  /* Radius */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --radius-2xl: 28px;
 }
 
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --border: 217.2 32.6% 17.5%;
+/* ── Base reset ──────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── Glassmorphism ───────────────────────── */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid var(--border);
+}
+
+.glass-bright {
+  background: var(--bg-glass-hover);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid var(--border-bright);
+}
+
+/* ── Glow utilities ──────────────────────── */
+.glow-accent {
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(14, 165, 233, 0.1);
+}
+
+.glow-critical {
+  box-shadow: 0 0 16px rgba(255, 69, 58, 0.35);
+}
+
+.glow-high {
+  box-shadow: 0 0 16px rgba(255, 107, 53, 0.3);
+}
+
+.glow-medium {
+  box-shadow: 0 0 16px rgba(255, 159, 10, 0.28);
+}
+
+.text-glow-accent {
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* ── Grid pattern background ─────────────── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.bg-dot {
+  background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Score badge system ──────────────────── */
+.score-badge-critical { background: rgba(255, 69, 58, 0.15); color: #FF6B62; border-color: rgba(255, 69, 58, 0.3); }
+.score-badge-high     { background: rgba(255, 107, 53, 0.15); color: #FF8A5C; border-color: rgba(255, 107, 53, 0.3); }
+.score-badge-medium   { background: rgba(255, 159, 10, 0.12); color: #FFB930; border-color: rgba(255, 159, 10, 0.3); }
+.score-badge-low      { background: rgba(48, 209, 88, 0.1);  color: #40E070; border-color: rgba(48, 209, 88, 0.25); }
+
+/* ── Slider override ─────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: var(--border-bright);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 16px var(--accent-glow), 0 0 24px rgba(14, 165, 233, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  border: none;
+  cursor: pointer;
+}
+
+/* ── Animation utilities ─────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px var(--accent-glow); }
+  50%       { box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(14,165,233,0.15); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up { animation: fadeUp 0.4s ease both; }
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+/* ── Scan line effect (teaser images) ───── */
+.scan-lines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+}
+
+/* ── Mono data display ───────────────────── */
+.font-data {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  letter-spacing: -0.02em;
+}
+
+/* ── Blur lock overlay ───────────────────── */
+.blur-locked {
+  filter: blur(10px) brightness(0.7);
+  transform: scale(1.06);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+/* ── Button system ───────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-lg);
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #38BDF8;
+  box-shadow: 0 4px 28px rgba(14, 165, 233, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent-bright);
 }
