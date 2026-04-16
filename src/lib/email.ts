@@ -1,6 +1,8 @@
 /**
  * AgentMail email utility for LotLeads platform.
- * Sends transactional emails via AgentMail REST API.
+ * Primary email delivery is handled by SureThing cron (AgentMail via Composio).
+ * This module is a direct REST API fallback — active when AGENTMAIL_API_KEY is set.
+ * Without the key, email calls are no-ops (non-fatal); cron handles delivery.
  */
 
 const AGENTMAIL_API_URL = 'https://api.agentmail.to/v0';
