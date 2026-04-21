@@ -1,20 +1,101 @@
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">Terms of Service</h1>
-      <div className="prose prose-gray">
-        <p className="text-gray-600 mb-4">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-        <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Service description</h2>
-        <p className="text-gray-600 mb-4">We provide commercial property lead intelligence, including aerial imagery analysis and property contact data, to licensed contractors and service companies.</p>
-        <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Acceptable use</h2>
-        <p className="text-gray-600 mb-4">Lead data is licensed for one-time use per purchase. You may not resell, redistribute, or share lead data with third parties. Data is for legitimate business prospecting only.</p>
-        <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Exclusivity</h2>
-        <p className="text-gray-600 mb-4">Exclusive leads provide a 72-hour window during which no other buyer can purchase the same lead. After 72 hours, the lead may be sold to other buyers as a shared lead.</p>
-        <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Refund policy</h2>
-        <p className="text-gray-600 mb-4">If contact information is inaccurate or outdated, we will replace the lead within 24 hours of your report. No cash refunds after contact data has been delivered.</p>
-        <h2 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Compliance</h2>
-        <p className="text-gray-600 mb-4">You agree to comply with all applicable laws, including CAN-SPAM, when contacting property managers using our data. You are responsible for your own outreach practices.</p>
+    <div style={{ background: '#05050F', minHeight: '100vh', fontFamily: "'Space Grotesk', sans-serif" }}>
+      {/* Nav */}
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <a href="/" style={{ color: '#0EA5E9', fontWeight: 700, textDecoration: 'none', fontSize: '18px', letterSpacing: '-0.01em' }}>LotLeads</a>
+        <a href="/leads" style={{ color: '#94a3b8', fontSize: '14px', textDecoration: 'none' }}>Browse Leads →</a>
       </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '60px 24px 80px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#f1f5f9', marginBottom: '8px', letterSpacing: '-0.02em' }}>Terms of Service</h1>
+        <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '48px' }}>Last updated: April 21, 2025</p>
+
+        <Section title="1. Service Description">
+          LotLeads provides AI-powered commercial parking lot lead intelligence to licensed contractors and paving companies. Our platform delivers aerial deterioration analysis, condition scores, and property owner contact information sourced from public records. By using our Service, you agree to these Terms.
+        </Section>
+
+        <Section title="2. Account Registration">
+          You must create an account to purchase leads. You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate, current information and to notify us immediately of any unauthorized use of your account. Accounts are for business use only; you must be at least 18 years old and authorized to bind your company to these Terms.
+        </Section>
+
+        <Section title="3. Purchases &amp; Pricing">
+          <strong style={{ color: '#cbd5e1' }}>Shared leads ($65):</strong> Sold to up to 3 buyers. All buyers receive the same contact information simultaneously.
+          <br /><br />
+          <strong style={{ color: '#cbd5e1' }}>Exclusive leads ($149):</strong> Sold to one buyer for a 72-hour exclusive window. After 72 hours, the lead may be made available to other buyers as a shared lead.
+          <br /><br />
+          <strong style={{ color: '#cbd5e1' }}>Pro subscription ($297/month):</strong> Includes 5 exclusive leads per month plus territory badge designation. Subscriptions renew automatically until cancelled.
+          <br /><br />
+          All prices are in USD. Applicable taxes are your responsibility.
+        </Section>
+
+        <Section title="4. Refund Policy">
+          All lead purchases are final once contact data has been delivered to your account. If the primary contact information for a purchased lead is materially inaccurate or outdated, report it to support@lotleads.app within 48 hours of purchase and we will replace the lead at no charge. No cash refunds are issued after contact data has been accessed. Pro subscription refunds are not available for the current billing period; you may cancel at any time to prevent future charges.
+        </Section>
+
+        <Section title="5. Acceptable Use">
+          Lead data is licensed for your internal business development use only. You may not:
+          <ul style={{ paddingLeft: '20px', marginTop: '8px' }}>
+            <li>Resell, redistribute, sublicense, or share lead data with third parties</li>
+            <li>Use lead data to build competing lead intelligence products or databases</li>
+            <li>Scrape, crawl, or extract data from the platform by automated means</li>
+            <li>Use the Service for any unlawful purpose or in violation of any applicable law</li>
+            <li>Impersonate another person or entity</li>
+          </ul>
+          <br />
+          Violation of these restrictions will result in immediate account termination and may result in legal action.
+        </Section>
+
+        <Section title="6. Outreach Compliance">
+          You are solely responsible for your outreach practices when contacting property owners or managers using our data. You agree to comply with all applicable laws, including CAN-SPAM, the Telephone Consumer Protection Act (TCPA), and any state-specific marketing regulations. LotLeads is not responsible for how you use contact data after delivery.
+        </Section>
+
+        <Section title="7. Lead Data Accuracy Disclaimer">
+          Property condition scores are generated by AI analysis of aerial imagery and are intended as directional indicators, not professional engineering assessments. Contact information is sourced from public records and may not reflect current ownership. LotLeads does not guarantee that any lead will result in a sale, a bid opportunity, or a successful business engagement. The Service is provided to assist your prospecting efforts, not to replace your professional judgment.
+        </Section>
+
+        <Section title="8. Intellectual Property">
+          LotLeads retains all rights to the platform, scoring models, imagery analysis, and any proprietary data compilations. You retain ownership of any business you generate using our leads. Nothing in these Terms transfers ownership of our platform or data to you.
+        </Section>
+
+        <Section title="9. Termination">
+          We reserve the right to suspend or terminate your account at any time for violation of these Terms, fraudulent activity, or any other reason with reasonable notice. Upon termination, your right to access purchased leads will cease. Credits or unused subscription time will not be refunded upon termination for cause.
+        </Section>
+
+        <Section title="10. Limitation of Liability">
+          To the maximum extent permitted by applicable law, LotLeads and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including lost profits or business opportunities, arising from your use of the Service. Our total liability to you for any claim shall not exceed the amount you paid to us in the 30 days preceding the claim.
+        </Section>
+
+        <Section title="11. Governing Law">
+          These Terms are governed by the laws of the State of Texas, without regard to conflict of law principles. Any disputes arising under these Terms shall be resolved in the courts of Texas.
+        </Section>
+
+        <Section title="12. Changes to These Terms">
+          We may update these Terms at any time. Continued use of the Service after changes are posted constitutes acceptance of the revised Terms. Material changes will be communicated to registered users by email.
+        </Section>
+
+        <Section title="13. Contact">
+          Questions about these Terms? Email{' '}
+          <a href="mailto:support@lotleads.app" style={{ color: '#0EA5E9', textDecoration: 'none' }}>support@lotleads.app</a>.
+        </Section>
+      </div>
+
+      {/* Footer */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '24px', textAlign: 'center', color: '#475569', fontSize: '13px' }}>
+        <a href="/" style={{ color: '#0EA5E9', textDecoration: 'none', marginRight: '16px' }}>LotLeads</a>
+        <a href="/privacy" style={{ color: '#64748b', textDecoration: 'none', marginRight: '16px' }}>Privacy Policy</a>
+        <a href="/terms" style={{ color: '#94a3b8', textDecoration: 'none' }}>Terms of Service</a>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: '36px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#e2e8f0', marginBottom: '12px', letterSpacing: '-0.01em' }}>{title}</h2>
+      <p style={{ fontSize: '15px', lineHeight: '1.75', color: '#94a3b8', margin: 0 }}>{children}</p>
     </div>
   );
 }
