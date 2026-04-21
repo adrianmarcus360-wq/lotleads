@@ -406,12 +406,14 @@ export default function LeadDetailPage() {
 
   const vaguePropType: Record<string, string> = {
     COMMERCIAL_PARKING: 'Commercial lot',
-    RETAIL_STRIP:       'Strip mall',
-    OFFICE_PARK:        'Office park',
-    INDUSTRIAL:         'Industrial lot',
-    MIXED_USE:          'Mixed-use property',
+    RETAIL_STRIP:       'Commercial lot',
+    OFFICE_PARK:        'Commercial lot',
+    INDUSTRIAL:         'Commercial lot',
+    MIXED_USE:          'Commercial lot',
   };
-  const vagueLabel = vaguePropType[lead.propertyType] ?? 'Commercial lot';
+  const vagueLabel = lead.locked
+    ? 'Commercial lot'
+    : (vaguePropType[lead.propertyType] ?? 'Commercial lot');
 
   return (
     <div className="min-h-screen bg-base">
@@ -429,7 +431,7 @@ export default function LeadDetailPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             Leads
           </Link>
-          {lead.propertyName && (
+          {!lead.locked && lead.propertyName && (
             <>
               <span className="text-ink-faint">/</span>
               <span className="text-sm text-ink truncate">{lead.propertyName}</span>
