@@ -43,13 +43,7 @@ const VERTICALS = [
   { id: 'STRIPING', label: 'Striping' },
 ];
 
-const PROP_TYPE_LABELS: Record<string, string> = {
-  COMMERCIAL_PARKING: 'Commercial Lot',
-  RETAIL_STRIP:       'Strip Mall',
-  OFFICE_PARK:        'Office Park',
-  INDUSTRIAL:         'Industrial',
-  MIXED_USE:          'Mixed Use',
-};
+
 
 function scoreBadgeClass(score: number) {
   if (score >= 9) return 'score-badge-critical';
@@ -76,7 +70,7 @@ function scoreColor(score: number) {
 function LeadCard({ lead, index }: { lead: Lead; index: number }) {
   const damages        = JSON.parse(lead.damageTypes || '[]') as string[];
   const isExcLocked    = lead.exclusiveBuyerId && lead.exclusiveExpiresAt && new Date(lead.exclusiveExpiresAt) > new Date();
-  const vagueType      = PROP_TYPE_LABELS[lead.propertyType] ?? 'Commercial Lot';
+  const vagueType      = 'Commercial Lot';
   const slotsLeft      = lead.maxSharedBuyers - lead.sharedBuyerCount;
   const color          = scoreColor(lead.conditionScore);
 
