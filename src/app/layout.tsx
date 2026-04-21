@@ -20,7 +20,7 @@ const appName = process.env.NEXT_PUBLIC_APP_NAME ?? 'LotLeads';
 
 export const metadata: Metadata = {
   title: {
-    default: `${appName} — AI Parking Lot Intelligence for Paving Contractors`,
+    default: `${appName} \u2014 AI Parking Lot Intelligence for Paving Contractors`,
     template: `%s | ${appName}`,
   },
   description:
@@ -45,6 +45,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         {children}
+        <footer style={{ background: '#05050F', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px', textAlign: 'center' }}>
+          <span style={{ fontSize: '13px', color: '#475569' }}>
+            &copy; {new Date().getFullYear()} LotLeads
+            {' \u00b7 '}
+            <a href="/privacy" style={{ color: '#64748b', textDecoration: 'none' }}>Privacy Policy</a>
+            {' \u00b7 '}
+            <a href="/terms" style={{ color: '#64748b', textDecoration: 'none' }}>Terms of Service</a>
+          </span>
+        </footer>
       </body>
     </html>
   );
